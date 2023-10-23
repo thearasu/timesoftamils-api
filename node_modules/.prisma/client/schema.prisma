@@ -1,0 +1,54 @@
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+model Author {
+    id                Int       @id @default(autoincrement())
+    name              String    @unique(map: "name") @db.VarChar(120)
+    username          String    @unique(map: "username") @db.VarChar(25)
+    profilePictureUrl String?   @db.VarChar(300)
+    createdAt         DateTime  @db.DateTime(0) @default(now())
+    updatedAt         DateTime  @db.DateTime(0) @updatedAt
+    articles          Article[]
+}
+
+model Article {
+    id           Int       @id @default(autoincrement())
+    title        String    @unique(map: "title") @db.VarChar(250)
+    slug         String    @unique(map: "slug") @db.VarChar(260)
+    content      String?   @db.LongText
+    thumbnailUrl String?   @db.VarChar(300)
+    authorId     Int
+    createdAt    DateTime  @db.DateTime(0) @default(now())
+    updatedAt    DateTime  @db.DateTime(0) @updatedAt
+    author       Author    @relation(fields: [authorId], references: [id])
+    comments     Comment[]
+}
+
+model Comment {
+    id        Int      @id @default(autoincrement())
+    articleId Int
+    userId    Int
+    content   String   @db.LongText
+    createdAt DateTime @db.DateTime(0) @default(now())
+    updatedAt DateTime @db.DateTime(0) @updatedAt
+    article   Article  @relation(fields: [articleId], references: [id])
+    user      User     @relation(fields: [userId], references: [id])
+}
+
+model User {
+    id                Int       @id @default(autoincrement())
+    name              String    @unique(map: "name") @db.VarChar(120)
+    username          String    @unique(map: "username") @db.VarChar(25)
+    email             String    @unique(map: "email") @db.VarChar(256)
+    password          String    @db.VarChar(256)
+    profilePictureUrl String?   @db.VarChar(300)
+    createdAt         DateTime  @db.DateTime(0) @default(now())
+    updatedAt         DateTime  @db.DateTime(0) @updatedAt
+    comments          Comment[]
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
